@@ -1,6 +1,11 @@
 # R_Workshop_Oct_2024 
-# By Assoc. Prof. Dr. Wong Kah Keng, Dept. Immunology, School of Medical Sciences, USM)
+Author: Assoc. Prof. Dr. Wong Kah Keng
 
+Affiliation: Department of Immunology, School of Medical Sciences, Universiti Sains Malaysia
+
+---
+
+```r
 ##########################################################################
 # Section 1: Install Packages, Load Libraries, and Set Working Directory
 ##########################################################################

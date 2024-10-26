@@ -557,3 +557,91 @@ heatmap <- Heatmap(
 
 # 5.9 Draw the heatmap
 draw(heatmap, heatmap_legend_side = "bottom")
+
+
+###############################################
+# Section 6: Line plots with user-defined 95% CI bounds
+###############################################
+### Subsection 1: Multiple line plots ###
+# 6.1 Load data and define x- and y-axis
+lineplot <- read.xlsx("Ggplot2_line_ABC-DLBCL.xlsx", sheet="Sheet1")
+x=lineplot$x
+y=lineplot$y
+lineplot2 <- read.xlsx("Ggplot2_line_GCB-DLBCL.xlsx", sheet="Sheet1")
+x2=lineplot2$x
+y2=lineplot2$y
+
+# 6.2 Optimised for the first line graph (GCB vs immune/TCR heatmap)
+ggplot(data = lineplot2, aes(x = x2, y = y2, fill = Type, color = Type)) +
+  scale_colour_brewer(palette = "Set1") +
+  geom_line(size = 1.5, alpha = 0.7) +
+  geom_point(aes(x = x2, y = y2)) +
+  geom_ribbon(aes(ymin = low, ymax = high), alpha = 0.3, color = NA) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(colour = "gray72", size = 0.5),
+    panel.background = element_blank()
+  )
+
+# 6.3 Optimised for the second line graph (ABC vs immune/TCR heatmap)
+ggplot(data = lineplot, aes(x = x, y = y, fill = Type, color = Type)) +
+  scale_colour_brewer(palette = "Set1") +
+  geom_line(size = 1.5, alpha = 0.7) +
+  geom_point(aes(x = x, y = y)) +
+  geom_ribbon(aes(ymin = low, ymax = high), alpha = 0.3, color = NA) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major = element_line(colour = "gray72", size = 0.5),
+    panel.background = element_blank()
+  )
+# Export as Pdf then print screen for the plot
+
+
+### Subsection 2: Calculate lower and upper bound of 95% CI ###
+# 6.4 Sample data
+data <- c(10, 12, 11, 13, 9)
+
+# 6.5 Function to calculate CI with flexible confidence level
+calculate_CI <- function(data, conf.level = 0.95) {
+    # Calculate mean and standard deviation
+    mean_val <- mean(data)
+    sd_val <- sd(data)
+    
+    # Sample size
+    n <- length(data)
+    
+    # Standard Error of the Mean (SEM)
+    sem <- sd_val / sqrt(n)
+    
+    # Alpha calculation
+    alpha <- 1 - conf.level
+    tail_prob <- 1 - alpha/2
+    
+    # Critical value selection based on sample size
+    critical_value <- if(n <= 30) {
+        # Use t-distribution for n ≤ 30
+        qt(tail_prob, df = n - 1)
+    } else {
+        # Use z-distribution for n > 30
+        qnorm(tail_prob)
+    }
+    
+    # Margin of Error (ME)
+    margin_error <- critical_value * sem
+    
+    # Confidence Interval
+    ci <- c(mean_val - margin_error, mean_val + margin_error)
+    
+    # Output with information
+    cat(sprintf("Sample size: %d\n", n))
+    cat(sprintf("Confidence level: %.1f%%\n", conf.level * 100))
+    cat(sprintf("Using %s distribution (critical value: %.3f)\n", 
+                if(n <= 30) "t" else "z", 
+                critical_value))
+    cat(sprintf("CI: [%.3f, %.3f]\n", ci[1], ci[2]))
+    
+    return(ci)
+}
+
+# 6.6 95% CI upper and lower bounds
+ci_95 <- calculate_CI(data, conf.level = 0.95)
